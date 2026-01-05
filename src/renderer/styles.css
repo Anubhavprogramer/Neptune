@@ -176,20 +176,27 @@ ompleted-section {
   margin: 0;
 }
 
-.toggle-button {
+.toggle-arrow {
   background: none;
-  border: 1px solid #ddd;
+  border: none;
   color: #666;
-  padding: 6px 12px;
-  border-radius: 4px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 16px;
+  padding: 8px;
+  border-radius: 4px;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.toggle-button:hover {
+.toggle-arrow:hover {
   background: #f5f5f5;
-  border-color: #ccc;
+  color: #333;
+}
+
+.toggle-arrow i {
+  transition: transform 0.3s ease;
 }
 
 .completed-list {
@@ -245,4 +252,228 @@ ompleted-section {
   background: #f8f9fa;
   border-color: #007acc;
   color: #007acc;
+}
+
+/* Overdue Tasks */
+.task-item.overdue {
+  border-left: 4px solid #dc3545;
+  background: linear-gradient(90deg, rgba(220, 53, 69, 0.1) 0%, #fff5f5 100%);
+  animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(220, 53, 69, 0); }
+}
+
+/* Task Controls */
+.task-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+}
+
+.due-date {
+  font-size: 12px;
+  color: #666;
+  background: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.due-date-placeholder {
+  font-size: 12px;
+  color: #999;
+  font-style: italic;
+}
+
+.overdue .due-date {
+  background: #dc3545;
+  color: white;
+  font-weight: bold;
+}
+
+.date-picker-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: #007acc;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.date-picker-btn:hover {
+  background: #0056b3;
+  transform: scale(1.1);
+}
+
+.date-picker {
+  position: absolute;
+  z-index: 1000;
+}
+
+/* Animations */
+.task-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(0);
+}
+
+.task-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.task-item.completing {
+  animation: slideOutRight 0.3s ease-in-out forwards;
+}
+
+.task-item.skipping {
+  animation: slideOutLeft 0.3s ease-in-out forwards;
+}
+
+.task-item.dragging {
+  transform: rotate(2deg) scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+@keyframes slideOutRight {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideOutLeft {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+/* New task animation */
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.task-item.new-task {
+  animation: slideInFromTop 0.3s ease-out;
+}
+
+/* Add button animation */
+.add-button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.add-button:active {
+  transform: scale(0.95);
+}
+
+/* Completed section animations */
+.completed-section {
+  transition: all 0.3s ease;
+}
+
+.completed-list {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.completed-task {
+  transition: all 0.2s ease;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 0.7;
+    transform: translateY(0);
+  }
+}
+
+/* Smooth scrolling */
+.notebook-container {
+  scroll-behavior: smooth;
+}
+
+/* Focus animations */
+.task-input:focus {
+  outline: none;
+  background: rgba(0, 122, 204, 0.05);
+  transition: background 0.2s ease;
+}/* Dele
+te button for completed tasks */
+.delete-completed-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: #dc3545;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 8px;
+  opacity: 0;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.completed-task:hover .delete-completed-btn {
+  opacity: 1;
+}
+
+.delete-completed-btn:hover {
+  background: #c82333;
+  transform: scale(1.1);
+}
+
+/* Delete animation */
+.completed-task.deleting {
+  animation: fadeOutScale 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeOutScale {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* Improved completed task layout */
+.completed-task {
+  position: relative;
+}
+
+.completed-task .task-text {
+  flex: 1;
 }

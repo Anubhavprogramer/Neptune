@@ -86,7 +86,9 @@ class NeptuneEditor {
     const task = {
       id: Date.now() + Math.random(),
       text: text,
-      created: new Date().toISOString()
+      created: new Date().toISOString(),
+      dueDate: null,
+      isNew: true
     };
     
     this.data.tasks.unshift(task);
@@ -132,6 +134,33 @@ class NeptuneEditor {
     }
   }
 
+  setTaskDueDate(taskId, dueDate) {
+    const task = this.data.tasks.find(t => t.id === taskId);
+    if (task) {
+      task.dueDate = dueDate;
+      this.saveData();
+      this.render();
+    }
+  }
+
+  deleteCompletedTask(taskId) {
+    const taskIndex = this.data.completed.findIndex(t => t.id === taskId);
+    if (taskIndex !== -1) {
+      this.data.completed.splice(taskIndex, 1);
+      this.saveData();
+      this.render();
+    }
+  }
+
+  isTaskOverdue(task) {
+    if (!task.dueDate) return false;
+    const today = new Date();
+    const dueDate = new Date(task.dueDate);
+    today.setHours(0, 0, 0, 0);
+    dueDate.setHours(0, 0, 0, 0);
+    return dueDate < today;
+  }
+
   moveTask(fromIndex, toIndex) {
     const task = this.data.tasks.splice(fromIndex, 1)[0];
     this.data.tasks.splice(toIndex, 0, task);
@@ -148,6 +177,12 @@ class NeptuneEditor {
       this.data.tasks.forEach((task, index) => {
         const taskElement = this.createTaskElement(task, index);
         this.taskList.appendChild(taskElement);
+        
+        // Add animation for new tasks
+        if (task.isNew) {
+          taskElement.classList.add('new-task');
+          delete task.isNew;
+        }
       });
     }
 
@@ -172,14 +207,16 @@ class NeptuneEditor {
 
   renderCompleted() {
     this.completedList.innerHTML = '';
-    this.toggleCompletedBtn.textContent = this.showCompleted ? 'Hide' : 'Show';
+    const arrow = this.toggleCompletedBtn.querySelector('i');
     
     if (!this.showCompleted) {
       this.completedList.style.display = 'none';
+      arrow.className = 'fas fa-chevron-down';
       return;
     }
     
     this.completedList.style.display = 'block';
+    arrow.className = 'fas fa-chevron-up';
     
     this.data.completed.forEach(task => {
       const completedElement = this.createCompletedTaskElement(task);
@@ -197,32 +234,58 @@ class NeptuneEditor {
       <input type="checkbox" class="task-checkbox" checked disabled>
       <span class="task-text">${task.text}</span>
       <span class="completed-date">${completedDate}</span>
+      <button class="delete-completed-btn" title="Delete permanently">
+        <i class="fas fa-trash"></i>
+      </button>
     `;
+    
+    // Add delete functionality
+    const deleteBtn = taskElement.querySelector('.delete-completed-btn');
+    deleteBtn.addEventListener('click', () => {
+      taskElement.classList.add('deleting');
+      setTimeout(() => this.deleteCompletedTask(task.id), 300);
+    });
     
     return taskElement;
   }
 
   createTaskElement(task, index) {
     const taskElement = document.createElement('div');
-    taskElement.className = 'task-item';
+    const overdue = this.isTaskOverdue(task);
+    
+    taskElement.className = `task-item ${overdue ? 'overdue' : ''}`;
     taskElement.draggable = true;
     taskElement.dataset.taskId = task.id;
     taskElement.dataset.index = index;
 
+    const dueDateDisplay = task.dueDate ? 
+      `<span class="due-date">${new Date(task.dueDate).toLocaleDateString()}</span>` : 
+      '<span class="due-date-placeholder">No due date</span>';
+
     taskElement.innerHTML = `
       <input type="checkbox" class="task-checkbox">
       <input type="text" class="task-input" value="${task.text}" placeholder="Enter task...">
-      <button class="task-skip">×</button>
+      <div class="task-controls">
+        ${dueDateDisplay}
+        <button class="date-picker-btn" title="Set due date">
+          <i class="fas fa-calendar"></i>
+        </button>
+        <input type="date" class="date-picker" style="display: none;">
+        <button class="task-skip">×</button>
+      </div>
     `;
 
     // Event listeners
     const checkbox = taskElement.querySelector('.task-checkbox');
     const input = taskElement.querySelector('.task-input');
     const skipButton = taskElement.querySelector('.task-skip');
+    const datePickerBtn = taskElement.querySelector('.date-picker-btn');
+    const datePicker = taskElement.querySelector('.date-picker');
 
     checkbox.addEventListener('change', () => {
       if (checkbox.checked) {
-        this.completeTask(task.id);
+        taskElement.classList.add('completing');
+        setTimeout(() => this.completeTask(task.id), 300);
       }
     });
 
@@ -237,7 +300,25 @@ class NeptuneEditor {
     });
 
     skipButton.addEventListener('click', () => {
-      this.skipTask(task.id);
+      taskElement.classList.add('skipping');
+      setTimeout(() => this.skipTask(task.id), 300);
+    });
+
+    datePickerBtn.addEventListener('click', () => {
+      datePicker.style.display = 'block';
+      datePicker.focus();
+      datePicker.click();
+    });
+
+    datePicker.addEventListener('change', () => {
+      this.setTaskDueDate(task.id, datePicker.value);
+      datePicker.style.display = 'none';
+    });
+
+    datePicker.addEventListener('blur', () => {
+      setTimeout(() => {
+        datePicker.style.display = 'none';
+      }, 200);
     });
 
     // Drag and drop

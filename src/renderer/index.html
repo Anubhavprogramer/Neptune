@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Neptune Todo</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
   <div class="notebook-container">
@@ -19,7 +20,9 @@
     <div id="completed-section" class="completed-section" style="display: none;">
       <div class="section-header">
         <h2 class="section-title">Completed</h2>
-        <button id="toggle-completed" class="toggle-button">Hide</button>
+        <button id="toggle-completed" class="toggle-arrow">
+          <i class="fas fa-chevron-down"></i>
+        </button>
       </div>
       <div id="completed-list" class="completed-list">
         <!-- Completed tasks will be dynamically added here -->
