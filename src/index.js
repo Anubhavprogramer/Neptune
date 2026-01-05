@@ -17,7 +17,8 @@ function createWindow(filePath) {
       contextIsolation: false
     },
     titleBarStyle: 'default',
-    title: `Neptune - ${path.basename(todoFilePath)}`
+    title: `Neptune - ${path.basename(todoFilePath)}`,
+    autoHideMenuBar: true
   });
 
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));

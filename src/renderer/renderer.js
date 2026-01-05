@@ -4,7 +4,11 @@ class NeptuneEditor {
   constructor() {
     this.data = { tasks: [], completed: [], skipped: [] };
     this.taskList = document.getElementById('task-list');
+    this.completedSection = document.getElementById('completed-section');
+    this.completedList = document.getElementById('completed-list');
     this.addButton = document.getElementById('add-task-btn');
+    this.toggleCompletedBtn = document.getElementById('toggle-completed');
+    this.showCompleted = false;
     
     this.init();
   }
@@ -25,6 +29,11 @@ class NeptuneEditor {
 
   setupEventListeners() {
     this.addButton.addEventListener('click', () => this.addTask());
+    
+    this.toggleCompletedBtn.addEventListener('click', () => {
+      this.showCompleted = !this.showCompleted;
+      this.renderCompleted();
+    });
     
     // File drop support
     document.addEventListener('dragover', (e) => {
@@ -135,13 +144,20 @@ class NeptuneEditor {
     
     if (this.data.tasks.length === 0) {
       this.renderEmptyState();
-      return;
+    } else {
+      this.data.tasks.forEach((task, index) => {
+        const taskElement = this.createTaskElement(task, index);
+        this.taskList.appendChild(taskElement);
+      });
     }
 
-    this.data.tasks.forEach((task, index) => {
-      const taskElement = this.createTaskElement(task, index);
-      this.taskList.appendChild(taskElement);
-    });
+    // Show completed section if there are completed tasks
+    if (this.data.completed.length > 0) {
+      this.completedSection.style.display = 'block';
+      this.renderCompleted();
+    } else {
+      this.completedSection.style.display = 'none';
+    }
   }
 
   renderEmptyState() {
@@ -152,6 +168,38 @@ class NeptuneEditor {
       <p>Click the + button to add a task<br>or drag files here to create tasks from filenames</p>
     `;
     this.taskList.appendChild(emptyState);
+  }
+
+  renderCompleted() {
+    this.completedList.innerHTML = '';
+    this.toggleCompletedBtn.textContent = this.showCompleted ? 'Hide' : 'Show';
+    
+    if (!this.showCompleted) {
+      this.completedList.style.display = 'none';
+      return;
+    }
+    
+    this.completedList.style.display = 'block';
+    
+    this.data.completed.forEach(task => {
+      const completedElement = this.createCompletedTaskElement(task);
+      this.completedList.appendChild(completedElement);
+    });
+  }
+
+  createCompletedTaskElement(task) {
+    const taskElement = document.createElement('div');
+    taskElement.className = 'completed-task';
+    
+    const completedDate = new Date(task.completed).toLocaleDateString();
+    
+    taskElement.innerHTML = `
+      <input type="checkbox" class="task-checkbox" checked disabled>
+      <span class="task-text">${task.text}</span>
+      <span class="completed-date">${completedDate}</span>
+    `;
+    
+    return taskElement;
   }
 
   createTaskElement(task, index) {
